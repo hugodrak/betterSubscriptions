@@ -2,16 +2,13 @@ require 'nokogiri'
 require 'open-uri'
 require 'httparty'
 require 'pp'
-require 'byebug'
 require 'json'
 @baseUrl = "https://www.youtube.com"
-# HTTP_OPTIONS = {"Cookie": "PREF=f1=50000000&hl=en-GB;"}
 
 def parse(file, type)
     if type == 1
         doc = Nokogiri::HTML(open(file))
     elsif type == 2
-        # response = HTTParty.get(file, query: HTTP_OPTIONS)
         response = HTTParty.get(file)
         doc = Nokogiri::HTML(response)
     end
@@ -28,7 +25,6 @@ def extractAriaInfo(aria, userName)
     p aria
     first = aria.regexp("/(?<=av #{userName}).*")
     puts first
-    # return age, views
 end
 
 def extractLength(raw)
@@ -67,13 +63,10 @@ end
 def getVideos(channel_url, count = 4)
     videos = []
     url = @baseUrl+channel_url+"/videos"
-    # url = ARGV[1]
     userVideosPage = parse(url, 2)
-    # userName = user["title"]
-    # userName = userVideosPage.css("title")[1].content
     videosRaw = userVideosPage.css(".channels-content-item")
-    # p videosRaw.length
     videosRaw = videosRaw.take(2)
+
     videosRaw.each do |videoRaw|
         title = videoRaw.css(".yt-lockup-title a")[0]["title"].to_s
         href = videoRaw.css(".yt-lockup-title a")[0]["href"].to_s
@@ -113,10 +106,3 @@ def createHTML()
 end
 
 createHTML()
-
-# users = filterUsers(parse(ARGV[0], 1))
-# text = ""
-# users.each_with_index do |user, index|
-#     text += (",{\"channelName\": \"#{user["title"]}\",\"url\": \"#{user["href"]}\"}")
-# end
-# File.open("subscriptions.json", "w+") {|file| file.write(text)}
